@@ -1,4 +1,4 @@
-// import { db, products } from 'lib/db';
+// import { db, purchases } from 'lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +7,7 @@ export async function GET() {
     message: 'Uncomment to seed data after DB is set up.'
   });
 
-  // await db.insert(products).values([
+  // await db.insert(purchases).values([
   //   {
   //     id: 1,
   //     imageUrl:

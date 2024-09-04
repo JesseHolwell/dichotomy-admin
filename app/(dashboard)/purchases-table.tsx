@@ -15,23 +15,23 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Product } from './product';
-import { SelectProduct } from '@/lib/db';
+import { Purchase } from './purchase';
+import { SelectPurchase } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function ProductsTable({
-  products,
+export function PurchasesTable({
+  purchases,
   offset,
-  totalProducts
+  totalPurchases
 }: {
-  products: SelectProduct[];
+  purchases: SelectPurchase[];
   offset: number;
-  totalProducts: number;
+  totalPurchases: number;
 }) {
   let router = useRouter();
-  let productsPerPage = 5;
+  let purchasesPerPage = 5;
 
   function prevPage() {
     router.back();
@@ -44,33 +44,36 @@ export function ProductsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Products</CardTitle>
+        <CardTitle>Purchases</CardTitle>
         <CardDescription>
-          Manage your products and view their sales performance.
+          Manage your purchases and view their sales performance.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="hidden w-[100px] sm:table-cell">
-                <span className="sr-only">Image</span>
-              </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Price</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead className="hidden md:table-cell">Name</TableHead>
+              <TableHead className="hidden md:table-cell">Stripe ID</TableHead>
               <TableHead className="hidden md:table-cell">
-                Total Sales
+                Shipping Address
               </TableHead>
-              <TableHead className="hidden md:table-cell">Created at</TableHead>
-              <TableHead>
+              <TableHead className="hidden md:table-cell">
+                Purchase Date
+              </TableHead>
+              <TableHead>Shipping status</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Shipping Date
+              </TableHead>
+              {/* <TableHead>
                 <span className="sr-only">Actions</span>
-              </TableHead>
+              </TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <Product key={product.id} product={product} />
+            {purchases.map((purchase) => (
+              <Purchase key={purchase.id} purchase={purchase} />
             ))}
           </TableBody>
         </Table>
@@ -80,9 +83,9 @@ export function ProductsTable({
           <div className="text-xs text-muted-foreground">
             Showing{' '}
             <strong>
-              {Math.min(offset - productsPerPage, totalProducts) + 1}-{offset}
+              {Math.min(offset - purchasesPerPage, totalPurchases) + 1}-{offset}
             </strong>{' '}
-            of <strong>{totalProducts}</strong> products
+            of <strong>{totalPurchases}</strong> purchases
           </div>
           <div className="flex">
             <Button
@@ -90,7 +93,7 @@ export function ProductsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset === productsPerPage}
+              disabled={offset === purchasesPerPage}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               Prev
@@ -100,7 +103,7 @@ export function ProductsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset + productsPerPage > totalProducts}
+              disabled={offset + purchasesPerPage > totalPurchases}
             >
               Next
               <ChevronRight className="ml-2 h-4 w-4" />

@@ -33,7 +33,7 @@ Inside the Vercel Postgres dashboard, create a table based on the schema defined
 ```
 CREATE TYPE status AS ENUM ('active', 'inactive', 'archived');
 
-CREATE TABLE products (
+CREATE TABLE purchases (
   id SERIAL PRIMARY KEY,
   image_url TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE products (
 );
 ```
 
-Then, uncomment `app/api/seed.ts` and hit `http://localhost:3000/api/seed` to seed the database with products.
+Then, uncomment `app/api/seed.ts` and hit `http://localhost:3000/api/seed` to seed the database with purchases.
 
 Next, copy the `.env.example` file to `.env` and update the values. Follow the instructions in the `.env.example` file to set up your GitHub OAuth application.
 

@@ -18,9 +18,9 @@ export default function Error({
     <main className="p-4 md:p-6">
       <div className="mb-8 space-y-4">
         <h1 className="font-semibold text-lg md:text-2xl">
-          Please complete setup
+          Something broke... ask for help
         </h1>
-        <p>
+        {/* <p>
           Inside the Vercel Postgres dashboard, create a table based on the
           schema defined in this repository.
         </p>
@@ -39,7 +39,7 @@ export default function Error({
           <code>
             {`INSERT INTO users (id, email, name, username) VALUES (1, 'me@site.com', 'Me', 'username');`}
           </code>
-        </pre>
+        </pre> */}
       </div>
     </main>
   );

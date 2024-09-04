@@ -16,57 +16,95 @@ import { createInsertSchema } from 'drizzle-zod';
 
 export const db = drizzle(neon(process.env.POSTGRES_URL!));
 
-export const statusEnum = pgEnum('status', ['active', 'inactive', 'archived']);
+export enum ShippingStatus {
+  Pending = 'pending',
+  Shipped = 'shipped',
+  Delivered = 'delivered'
+}
 
-export const products = pgTable('products', {
+const shippingStatus = pgEnum('shipping_status', [
+  ShippingStatus.Pending,
+  ShippingStatus.Shipped,
+  ShippingStatus.Delivered
+]);
+
+export const purchases = pgTable('purchases', {
   id: serial('id').primaryKey(),
-  imageUrl: text('image_url').notNull(),
   name: text('name').notNull(),
-  status: statusEnum('status').notNull(),
-  price: numeric('price', { precision: 10, scale: 2 }).notNull(),
-  stock: integer('stock').notNull(),
-  availableAt: timestamp('available_at').notNull()
+  email: text('email').notNull(),
+  stripe_transaction_id: text('stripe_transaction_id').notNull(),
+  shipping_address: text('shipping_address').notNull(),
+  purchase_date: timestamp('purchase_date').notNull(),
+  shipping_status: shippingStatus('shipping_status').notNull(),
+  shipping_date: timestamp('shipping_date')
 });
 
-export type SelectProduct = typeof products.$inferSelect;
-export const insertProductSchema = createInsertSchema(products);
+export type SelectPurchase = typeof purchases.$inferSelect;
+export const insertPurchaseSchema = createInsertSchema(purchases);
 
-export async function getProducts(
+export async function getPurchases(
   search: string,
   offset: number
 ): Promise<{
-  products: SelectProduct[];
+  purchases: SelectPurchase[];
   newOffset: number | null;
-  totalProducts: number;
+  totalPurchases: number;
 }> {
   // Always search the full table, not per page
   if (search) {
     return {
-      products: await db
+      purchases: await db
         .select()
-        .from(products)
-        .where(ilike(products.name, `%${search}%`))
+        .from(purchases)
+        .where(ilike(purchases.name, `%${search}%`))
         .limit(1000),
       newOffset: null,
-      totalProducts: 0
+      totalPurchases: 0
     };
   }
 
   if (offset === null) {
-    return { products: [], newOffset: null, totalProducts: 0 };
+    return { purchases: [], newOffset: null, totalPurchases: 0 };
   }
 
-  let totalProducts = await db.select({ count: count() }).from(products);
-  let moreProducts = await db.select().from(products).limit(5).offset(offset);
-  let newOffset = moreProducts.length >= 5 ? offset + 5 : null;
+  let totalPurchases = await db.select({ count: count() }).from(purchases);
+  let morePurchases = await db.select().from(purchases).limit(5).offset(offset);
+  let newOffset = morePurchases.length >= 5 ? offset + 5 : null;
 
   return {
-    products: moreProducts,
+    purchases: morePurchases,
     newOffset,
-    totalProducts: totalProducts[0].count
+    totalPurchases: totalPurchases[0].count
   };
 }
 
-export async function deleteProductById(id: number) {
-  await db.delete(products).where(eq(products.id, id));
+export async function deletePurchaseById(id: number) {
+  await db.delete(purchases).where(eq(purchases.id, id));
+}
+
+export async function modifyPurchase(id: number, status: ShippingStatus) {
+  // Create an object to store the updates
+  const updates: Partial<{
+    shipping_status: ShippingStatus;
+    shipping_date: Date | null;
+  }> = {
+    shipping_status: status
+  };
+
+  // Add shipping_date update logic based on status
+  if (status === ShippingStatus.Shipped) {
+    // Set shipping_date to the current date when status is 'shipped'
+    updates.shipping_date = new Date();
+  } else if (status === ShippingStatus.Pending) {
+    // Clear shipping_date when status is 'pending'
+    updates.shipping_date = null;
+  }
+
+  // Perform the update operation with the prepared updates
+  await db
+    .update(purchases)
+    .set(updates) // Set the shipping_status and/or shipping_date based on the updates object
+    .where(eq(purchases.id, id)); // Update where the purchase ID matches the provided ID
+
+  console.log('modified purchase', id);
 }
